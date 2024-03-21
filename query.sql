@@ -1,0 +1,24 @@
+SELECT 'SELECT TOP 1 ' + CHAR(39) + TABLE_NAME + CHAR(39) + ' FROM dbo.' + TABLE_NAME + ' WHERE ' + COLUMN_NAME + ' LIKE ' + CHAR(39) + '%FieldValueToFind%' + CHAR(39) + ';' as query
+INTO #temp
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE COLUMN_NAME LIKE '%ColumnToFind%';
+
+DECLARE @sql NVARCHAR(MAX);
+DECLARE @table NVARCHAR(MAX);
+
+DECLARE cur CURSOR FOR
+SELECT * FROM #temp;
+
+OPEN cur;
+FETCH NEXT FROM cur INTO @table;
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    SET @sql = @table;
+    EXEC sp_executesql @sql;
+
+    FETCH NEXT FROM cur INTO @table;
+END
+
+CLOSE cur;
+DEALLOCATE cur;
